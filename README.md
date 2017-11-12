@@ -1,2 +1,2 @@
 # cdp-21
-# API GAteway + Lambda with Java +  S3
+## API Gateway + Lambda with Java +  S3
