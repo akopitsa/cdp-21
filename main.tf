@@ -22,5 +22,11 @@ module "lambda" {
 }
 
 module "apiGW" {
-  source = "./modules/apigateway"
+  source               = "./modules/apigateway"
+  region               = "${var.region}"
+  lambda-get-arn       = "${module.lambda.lambda-get-arn}"
+  lambda-post-arn      = "${module.lambda.lambda-post-arn}"
+  lambda-post-function = "${module.lambda.lambda-post-function}"
+  lambda-get-function  = "${module.lambda.lambda-get-function}"
+  account_id           = "${module.lambda.account_id}"
 }
