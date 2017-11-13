@@ -21,6 +21,18 @@ resource "aws_api_gateway_method" "method-get" {
   resource_id   = "${aws_api_gateway_resource.show.id}"
   http_method   = "GET"
   authorization = "NONE"
+
+  # request_parameters {
+  #   "integration.request.path.id" = "method.request.path.accountId"
+  # }
+  request_parameters = {
+    #"method.request.header.X-Some-Header" = true
+    "method.request.querystring.name" = true
+  }
+
+  request_models = {
+    "application/json" = "Empty"
+  }
 }
 
 resource "aws_api_gateway_method" "method-post" {
@@ -28,6 +40,16 @@ resource "aws_api_gateway_method" "method-post" {
   resource_id   = "${aws_api_gateway_resource.add.id}"
   http_method   = "POST"
   authorization = "NONE"
+
+  request_parameters = {
+    #"method.request.header.X-Some-Header" = true
+    "method.request.querystring.name" = true
+    "method.request.querystring.time" = true
+  }
+
+  # request_models = {
+  #   "application/json" = "Empty"
+  # }
 }
 
 resource "aws_api_gateway_integration" "integration-add" {
@@ -67,5 +89,37 @@ resource "aws_api_gateway_method_response" "post200" {
 
   response_models = {
     "application/json" = "Empty"
+  }
+}
+
+resource "aws_api_gateway_integration_response" "GetIntegrationResponse" {
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  resource_id = "${aws_api_gateway_resource.show.id}"
+  http_method = "${aws_api_gateway_method.method-get.http_method}"
+  status_code = "${aws_api_gateway_method_response.get200.status_code}"
+  depends_on  = ["aws_api_gateway_integration.integration-show"]
+
+  # Transforms the backend JSON response to JSON
+  response_templates {
+    "application/json" = <<EOF
+EOF
+  }
+}
+
+resource "aws_api_gateway_integration_response" "PostIntegrationResponse" {
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  resource_id = "${aws_api_gateway_resource.add.id}"
+  http_method = "${aws_api_gateway_method.method-post.http_method}"
+  status_code = "${aws_api_gateway_method_response.post200.status_code}"
+  depends_on  = ["aws_api_gateway_integration.integration-add"]
+
+  # Transforms the backend JSON response to JSON
+  response_templates {
+    "application/json" = <<EOF
+    {
+       "name": "$input.params('name')",
+       "time": "$input.params('time')"
+    }
+EOF
   }
 }
