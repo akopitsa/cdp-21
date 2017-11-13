@@ -21,7 +21,7 @@ resource "aws_s3_bucket_object" "mybucket-for-lambda-dynamodb-get" {
 
   //etag   = "${md5(file("/Users/andrey.kopitsa/eclipse-workspace/HelloLambda/build/distributions/HelloLambda.zip"))}"
   tags {
-    Name = "mybucket-for-lambda-function"
+    Name = "mybucket-for-lambda-function-post"
   }
 }
 
@@ -35,6 +35,6 @@ resource "aws_s3_bucket_object" "mybucket-for-lambda-dynamodb-post" {
 
   //etag   = "${md5(file("/Users/andrey.kopitsa/eclipse-workspace/HelloLambda/build/distributions/HelloLambda.zip"))}"
   tags {
-    Name = "mybucket-for-lambda-function"
+    Name = "mybucket-for-lambda-function-get"
   }
 }

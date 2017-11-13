@@ -23,7 +23,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "lambda-policy" {
-  name = "test-policy"
+  name = "lambda-api-policy"
   role = "${aws_iam_role.iam_for_lambda.id}"
 
   policy = <<POLICY
@@ -99,9 +99,9 @@ resource "aws_lambda_function" "post_lambda" {
   function_name     = "HelloLambdaPost"
   role              = "${aws_iam_role.iam_for_lambda.arn}"
   handler           = "com.amazonaws.lambda.demo.HelloLambda"
-
-  runtime = "java8"
-  timeout = "55"
+  memory_size       = "256"
+  runtime           = "java8"
+  timeout           = "55"
 
   # environment {
   #   variables = {
@@ -117,9 +117,9 @@ resource "aws_lambda_function" "get_lambda" {
   function_name     = "HelloLambdaGet"
   role              = "${aws_iam_role.iam_for_lambda.arn}"
   handler           = "com.amazonaws.lambda.demo.LambdaFunctionHandler"
-
-  runtime = "java8"
-  timeout = "55"
+  memory_size       = "256"
+  runtime           = "java8"
+  timeout           = "55"
 
   # environment {
   #   variables = {

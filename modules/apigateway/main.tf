@@ -27,12 +27,12 @@ resource "aws_api_gateway_method" "method-get" {
   # }
   request_parameters = {
     #"method.request.header.X-Some-Header" = true
-    "method.request.querystring.name" = true
+    "method.request.querystring.name" = ""
   }
 
-  request_models = {
-    "application/json" = "Empty"
-  }
+  # request_models = {
+  #   "application/json" = "Empty"
+  # }
 }
 
 resource "aws_api_gateway_method" "method-post" {
@@ -46,10 +46,6 @@ resource "aws_api_gateway_method" "method-post" {
     "method.request.querystring.name" = true
     "method.request.querystring.time" = true
   }
-
-  # request_models = {
-  #   "application/json" = "Empty"
-  # }
 }
 
 resource "aws_api_gateway_integration" "integration-add" {
@@ -59,6 +55,16 @@ resource "aws_api_gateway_integration" "integration-add" {
   integration_http_method = "POST"
   type                    = "AWS"
   uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.lambda-post-arn}/invocations"
+  passthrough_behavior    = "WHEN_NO_TEMPLATES"
+
+  request_templates = {
+    "application/json" = <<EOF
+    {
+       "name": "$input.params('name')",
+       "time": "$input.params('time')"
+    }
+EOF
+  }
 }
 
 resource "aws_api_gateway_integration" "integration-show" {
@@ -68,6 +74,15 @@ resource "aws_api_gateway_integration" "integration-show" {
   integration_http_method = "GET"
   type                    = "AWS"
   uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.lambda-get-arn}/invocations"
+  passthrough_behavior    = "WHEN_NO_TEMPLATES"
+
+  request_templates = {
+    "application/json" = <<EOF
+    {
+       "name": "$input.params('name')"
+    }
+EOF
+  }
 }
 
 resource "aws_api_gateway_method_response" "get200" {
@@ -131,7 +146,7 @@ resource "aws_lambda_permission" "apigw_lambdaGet" {
   principal     = "apigateway.amazonaws.com"
 
   # More: http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html
-  source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${aws_api_gateway_rest_api.api.id}/*/${aws_api_gateway_method.method-get.http_method}${aws_api_gateway_resource.show.path}"
+  #source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${aws_api_gateway_rest_api.api.id}/*/${aws_api_gateway_method.method-get.http_method}${aws_api_gateway_resource.show.path}"
 }
 
 resource "aws_lambda_permission" "apigw_lambdaPost" {
@@ -141,5 +156,5 @@ resource "aws_lambda_permission" "apigw_lambdaPost" {
   principal     = "apigateway.amazonaws.com"
 
   # More: http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html
-  source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${aws_api_gateway_rest_api.api.id}/*/${aws_api_gateway_method.method-post.http_method}${aws_api_gateway_resource.add.path}"
+  #source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${aws_api_gateway_rest_api.api.id}/*/${aws_api_gateway_method.method-post.http_method}${aws_api_gateway_resource.add.path}"
 }
