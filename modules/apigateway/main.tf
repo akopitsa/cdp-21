@@ -36,9 +36,7 @@ resource "aws_api_gateway_integration" "integration-add" {
   http_method             = "${aws_api_gateway_method.method-post.http_method}"
   integration_http_method = "POST"
   type                    = "AWS"
-
-  #uri                     = "arn:aws:lambda:${var.region}:${var.account_id}:function:${var.lambda-post-function}"
-  uri = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.lambda-post-arn}/invocations"
+  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.lambda-post-arn}/invocations"
 }
 
 resource "aws_api_gateway_integration" "integration-show" {
@@ -47,7 +45,27 @@ resource "aws_api_gateway_integration" "integration-show" {
   http_method             = "${aws_api_gateway_method.method-get.http_method}"
   integration_http_method = "GET"
   type                    = "AWS"
+  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.lambda-get-arn}/invocations"
+}
 
-  #uri                     = "arn:aws:lambda:${var.region}:${var.account_id}:function:${var.lambda-get-function}"
-  uri = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.lambda-get-arn}/invocations"
+resource "aws_api_gateway_method_response" "get200" {
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  resource_id = "${aws_api_gateway_resource.show.id}"
+  http_method = "${aws_api_gateway_method.method-get.http_method}"
+  status_code = "200"
+
+  response_models = {
+    "application/json" = "Empty"
+  }
+}
+
+resource "aws_api_gateway_method_response" "post200" {
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  resource_id = "${aws_api_gateway_resource.add.id}"
+  http_method = "${aws_api_gateway_method.method-post.http_method}"
+  status_code = "200"
+
+  response_models = {
+    "application/json" = "Empty"
+  }
 }
