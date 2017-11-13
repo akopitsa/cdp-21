@@ -125,7 +125,7 @@ EOF
 }
 
 resource "aws_lambda_permission" "apigw_lambdaGet" {
-  statement_id  = "AllowExecutionFromAPIGateway"
+  statement_id  = "AllowExecutionFromAPIGatewayGet"
   action        = "lambda:InvokeFunction"
   function_name = "${var.lambda-get-arn}"
   principal     = "apigateway.amazonaws.com"
@@ -135,9 +135,9 @@ resource "aws_lambda_permission" "apigw_lambdaGet" {
 }
 
 resource "aws_lambda_permission" "apigw_lambdaPost" {
-  statement_id  = "AllowExecutionFromAPIGateway"
+  statement_id  = "AllowExecutionFromAPIGatewayPost"
   action        = "lambda:InvokeFunction"
-  function_name = "${var.lambda-get-arn}"
+  function_name = "${var.lambda-post-arn}"
   principal     = "apigateway.amazonaws.com"
 
   # More: http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html

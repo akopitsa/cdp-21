@@ -8,7 +8,11 @@ resource "aws_iam_role" "iam_for_lambda" {
     {
       "Action": "sts:AssumeRole",
       "Principal": {
-        "Service": "lambda.amazonaws.com"
+        "Service": [
+          "lambda.amazonaws.com",
+          "apigateway.amazonaws.com",
+          "s3.amazonaws.com"
+        ]
       },
       "Effect": "Allow",
       "Sid": ""
@@ -16,6 +20,76 @@ resource "aws_iam_role" "iam_for_lambda" {
   ]
 }
 EOF
+}
+
+resource "aws_iam_role_policy" "lambda-policy" {
+  name = "test-policy"
+  role = "${aws_iam_role.iam_for_lambda.id}"
+
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "lambda:InvokeFunction"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:Describe*",
+        "cloudwatch:Get*",
+        "cloudwatch:List*"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+POLICY
+}
+
+resource "aws_iam_role_policy_attachment" "basic-exec-role" {
+  role = "${aws_iam_role.iam_for_lambda.name}"
+
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+
+  #policy_arn = "arn:aws:iam::aws:policy/service-role/AdministratorAccess"
+}
+
+data "aws_iam_policy_document" "s3-access-ro" {
+  statement {
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket",
+    ]
+
+    resources = [
+      "arn:aws:s3:::*",
+    ]
+  }
+}
+
+resource "aws_iam_policy" "s3-access-ro" {
+  name   = "s3-access-ro"
+  path   = "/"
+  policy = "${data.aws_iam_policy_document.s3-access-ro.json}"
+}
+
+resource "aws_iam_role_policy_attachment" "s3-access-ro" {
+  role       = "${aws_iam_role.iam_for_lambda.name}"
+  policy_arn = "${aws_iam_policy.s3-access-ro.arn}"
 }
 
 resource "aws_lambda_function" "post_lambda" {
