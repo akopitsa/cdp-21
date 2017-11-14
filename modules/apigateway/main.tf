@@ -161,16 +161,16 @@ resource "aws_lambda_permission" "apigw_lambdaPost" {
   source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${aws_api_gateway_rest_api.api.id}/*/${aws_api_gateway_method.method-post.http_method}${aws_api_gateway_resource.add.path}"
 }
 
-resource "aws_api_gateway_deployment" "HelloWorldAPIDeployment" {
+resource "aws_api_gateway_deployment" "APIDeployment" {
   depends_on  = ["aws_api_gateway_integration_response.GetIntegrationResponse", "aws_api_gateway_integration_response.GetIntegrationResponse"]
   rest_api_id = "${aws_api_gateway_rest_api.api.id}"
   stage_name  = "beta"
 }
 
 output "post_url" {
-  value = "https://${aws_api_gateway_deployment.HelloWorldAPIDeployment.rest_api_id}.execute-api.${var.region}.amazonaws.com/${aws_api_gateway_deployment.HelloWorldAPIDeployment.stage_name}/add?name=Petya&time=12:25"
+  value = "https://${aws_api_gateway_deployment.APIDeployment.rest_api_id}.execute-api.${var.region}.amazonaws.com/${aws_api_gateway_deployment.HelloWorldAPIDeployment.stage_name}/add?name=Petya&time=12:25"
 }
 
 output "get_url" {
-  value = "https://${aws_api_gateway_deployment.HelloWorldAPIDeployment.rest_api_id}.execute-api.${var.region}.amazonaws.com/${aws_api_gateway_deployment.HelloWorldAPIDeployment.stage_name}/show?name=Petya"
+  value = "https://${aws_api_gateway_deployment.APIDeployment.rest_api_id}.execute-api.${var.region}.amazonaws.com/${aws_api_gateway_deployment.HelloWorldAPIDeployment.stage_name}/show?name=Petya"
 }
