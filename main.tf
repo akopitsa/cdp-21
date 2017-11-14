@@ -30,3 +30,11 @@ module "apiGW" {
   lambda-get-function  = "${module.lambda.lambda-get-function}"
   account_id           = "${module.lambda.account_id}"
 }
+
+output "get_url" {
+  value = "${module.apiGW.get_url}"
+}
+
+output "post_url" {
+  value = "${module.apiGW.post_url}"
+}
