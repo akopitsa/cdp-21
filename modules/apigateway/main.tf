@@ -49,9 +49,10 @@ resource "aws_api_gateway_method" "method-post" {
 }
 
 resource "aws_api_gateway_integration" "integration-add" {
-  rest_api_id             = "${aws_api_gateway_rest_api.api.id}"
-  resource_id             = "${aws_api_gateway_resource.add.id}"
-  http_method             = "${aws_api_gateway_method.method-post.http_method}"
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  resource_id = "${aws_api_gateway_resource.add.id}"
+  http_method = "${aws_api_gateway_method.method-post.http_method}"
+
   integration_http_method = "POST"
   type                    = "AWS"
   uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.lambda-post-arn}/invocations"
@@ -68,10 +69,11 @@ EOF
 }
 
 resource "aws_api_gateway_integration" "integration-show" {
-  rest_api_id             = "${aws_api_gateway_rest_api.api.id}"
-  resource_id             = "${aws_api_gateway_resource.show.id}"
-  http_method             = "${aws_api_gateway_method.method-get.http_method}"
-  integration_http_method = "GET"
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  resource_id = "${aws_api_gateway_resource.show.id}"
+  http_method = "${aws_api_gateway_method.method-get.http_method}"
+
+  integration_http_method = "POST"
   type                    = "AWS"
   uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.lambda-get-arn}/invocations"
   passthrough_behavior    = "WHEN_NO_TEMPLATES"
@@ -140,21 +142,35 @@ EOF
 }
 
 resource "aws_lambda_permission" "apigw_lambdaGet" {
-  statement_id  = "AllowExecutionFromAPIGatewayGet"
+  statement_id  = "AllowExecutionFromAPIGatewayGet2017"
   action        = "lambda:InvokeFunction"
-  function_name = "${var.lambda-get-arn}"
+  function_name = "${var.lambda-get-function}"
   principal     = "apigateway.amazonaws.com"
 
   # More: http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html
-  #source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${aws_api_gateway_rest_api.api.id}/*/${aws_api_gateway_method.method-get.http_method}${aws_api_gateway_resource.show.path}"
+  source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${aws_api_gateway_rest_api.api.id}/*/${aws_api_gateway_method.method-get.http_method}${aws_api_gateway_resource.show.path}"
 }
 
 resource "aws_lambda_permission" "apigw_lambdaPost" {
-  statement_id  = "AllowExecutionFromAPIGatewayPost"
+  statement_id  = "AllowExecutionFromAPIGatewayPost2017"
   action        = "lambda:InvokeFunction"
-  function_name = "${var.lambda-post-arn}"
+  function_name = "${var.lambda-post-function}"
   principal     = "apigateway.amazonaws.com"
 
   # More: http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html
-  #source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${aws_api_gateway_rest_api.api.id}/*/${aws_api_gateway_method.method-post.http_method}${aws_api_gateway_resource.add.path}"
+  source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${aws_api_gateway_rest_api.api.id}/*/${aws_api_gateway_method.method-post.http_method}${aws_api_gateway_resource.add.path}"
+}
+
+resource "aws_api_gateway_deployment" "HelloWorldAPIDeployment" {
+  depends_on  = ["aws_api_gateway_integration_response.GetIntegrationResponse", "aws_api_gateway_integration_response.GetIntegrationResponse"]
+  rest_api_id = "${aws_api_gateway_rest_api.api.id}"
+  stage_name  = "beta"
+}
+
+output "post_url" {
+  value = "https://${aws_api_gateway_deployment.HelloWorldAPIDeployment.rest_api_id}.execute-api.${var.region}.amazonaws.com/${aws_api_gateway_deployment.HelloWorldAPIDeployment.stage_name}/add?name=Petya&time=12:25"
+}
+
+output "get_url" {
+  value = "https://${aws_api_gateway_deployment.HelloWorldAPIDeployment.rest_api_id}.execute-api.${var.region}.amazonaws.com/${aws_api_gateway_deployment.HelloWorldAPIDeployment.stage_name}/show?name=Petya"
 }
